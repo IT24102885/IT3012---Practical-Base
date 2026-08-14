@@ -69,6 +69,7 @@ class VisualGridHuntGame:
         wall_ahead = (
         front_y >= self.height or
         (front_x, front_y) in self.walls
+        
     )
 
     
@@ -77,6 +78,10 @@ class VisualGridHuntGame:
         return {
         "wall_ahead": wall_ahead,
         "food_here": food_here
+
+        "grid_size": (self.width, self.height),
+        "walls": list(self.walls),
+        "all_food": list(self.food_positions)
     }
 
     def execute_action(self, action: str):
