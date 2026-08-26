@@ -77,7 +77,7 @@ class VisualGridHuntGame:
 
         return {
         "wall_ahead": wall_ahead,
-        "food_here": food_here
+        "food_here": food_here,
 
         "grid_size": (self.width, self.height),
         "walls": list(self.walls),
