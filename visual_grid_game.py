@@ -8,14 +8,7 @@ from agent import SearchAgent
 class VisualGridHuntGame:
     """A flexible Pacman-style grid environment with support for configurable opponents and larger scales."""
 
-    def __init__(
-        self,
-        width=10,
-        height=10,
-        num_food=10,
-        num_opponents=2,
-        custom_walls=None
-    ):
+    def __init__(self, width=10, height=10, num_food=10, num_opponents=2, custom_walls=None):
         self.width = width
         self.height = height
         self.agent_pos = [0, 0]  # Starting position (x, y)
@@ -24,16 +17,9 @@ class VisualGridHuntGame:
             self.walls = set(custom_walls)
         else:
             # Generate some default scattered walls for a larger grid
-            self.walls = {
-                (2, 2),
-                (2, 3),
-                (5, 5),
-                (6, 5),
-                (3, 7)
-            }
+            self.walls = {(2, 2), (2, 3), (5, 5), (6, 5), (3, 7)}
 
-        # Dynamically generate random food positions
-        # avoiding walls and agent start
+        # Dynamically generate random food positions avoiding walls and agent start
         self.food_positions = set()
 
         while len(self.food_positions) < num_food:
@@ -42,14 +28,14 @@ class VisualGridHuntGame:
 
             pos_tuple = (fx, fy)
 
-            if (
-                pos_tuple != (0, 0)
-                and pos_tuple not in self.walls
-            ):
+            if pos_tuple != (0, 0) and pos_tuple not in self.walls:
                 self.food_positions.add(pos_tuple)
 
-        # Generate toxic trap positions
-        # avoiding start position, walls, and food
+        # ==========================================================
+        # TOXIC TRAPS
+        # Original brown block generation kept unchanged
+        # ==========================================================
+
         self.toxic_traps = set()
 
         num_traps = 5
@@ -154,7 +140,11 @@ class VisualGridHuntGame:
             self.food_positions.remove(tuple_pos)
             self.score += 20
 
-        # Check toxic trap
+        # ==========================================================
+        # CHECK TOXIC TRAP
+        # Original brown block logic kept unchanged
+        # ==========================================================
+
         if tuple_pos in self.toxic_traps:
             self.score -= 15
 
@@ -240,6 +230,12 @@ class GridGameGUI:
         # Use SearchAgent instead of random movement
         self.agent = SearchAgent()
 
+        # ==========================================================
+        # DEFAULT SEARCH ALGORITHM
+        # ==========================================================
+
+        self.agent.active_algo = "AStar"
+
         # Dynamically calculate cell size
         max_canvas_dim = 600
 
@@ -272,7 +268,7 @@ class GridGameGUI:
         self.label.pack(pady=10)
 
         # ==========================================================
-        # Algorithm Selection
+        # ALGORITHM SELECTION
         # ==========================================================
 
         algorithm_frame = tk.Frame(root)
@@ -319,7 +315,7 @@ class GridGameGUI:
         )
 
         # ==========================================================
-        # Start Simulation Button
+        # START SIMULATION BUTTON
         # ==========================================================
 
         self.btn = tk.Button(
@@ -336,12 +332,12 @@ class GridGameGUI:
         self.draw_grid()
 
     # ==============================================================
-    # Algorithm Selection
+    # SET SELECTED ALGORITHM
     # ==============================================================
 
     def set_algorithm(self, algorithm):
 
-        # Store selected algorithm in SearchAgent
+        # Store selected algorithm
         self.agent.active_algo = algorithm
 
         # Clear previous search plan
@@ -356,20 +352,18 @@ class GridGameGUI:
         )
 
     # ==============================================================
-    # Draw Grid
+    # DRAW GRID
     # ==============================================================
 
     def draw_grid(self):
 
         self.canvas.delete("all")
 
-        # Draw grid cells
         for x in range(self.env.width):
 
             for y in range(self.env.height):
 
                 x1 = x * self.cell_size
-
                 y1 = (
                     self.env.height - 1 - y
                 ) * self.cell_size
@@ -392,7 +386,7 @@ class GridGameGUI:
                     outline="#cbd5e1"
                 )
 
-                # Draw wall label
+                # Only draw text if cell is large enough
                 if (
                     self.cell_size >= 40
                     and (x, y) in self.env.walls
@@ -407,8 +401,8 @@ class GridGameGUI:
                     )
 
         # ==========================================================
-        # Draw Food
-        # ==========================================================
+        # DRAW FOOD
+        # ==============================================================
 
         for fx, fy in self.env.food_positions:
 
@@ -435,8 +429,8 @@ class GridGameGUI:
             )
 
         # ==========================================================
-        # Draw Opponents
-        # ==========================================================
+        # DRAW OPPONENTS
+        # ==============================================================
 
         for ox, oy in self.env.opponents:
 
@@ -463,9 +457,9 @@ class GridGameGUI:
             )
 
         # ==========================================================
-        # Draw Toxic Traps
-        # Brown block remains in the same place/logic
-        # ==========================================================
+        # DRAW TOXIC TRAPS
+        # Brown block remains exactly in the original place/logic
+        # ==============================================================
 
         for tx, ty in self.env.toxic_traps:
 
@@ -492,8 +486,8 @@ class GridGameGUI:
             )
 
         # ==========================================================
-        # Draw Agent
-        # ==========================================================
+        # DRAW AGENT
+        # ==============================================================
 
         ax, ay = self.env.agent_pos
 
@@ -520,7 +514,7 @@ class GridGameGUI:
         )
 
     # ==============================================================
-    # Run Simulation
+    # RUN SIMULATION
     # ==============================================================
 
     def run_loop(self):
@@ -531,21 +525,27 @@ class GridGameGUI:
 
             if not self.env.is_done():
 
-                # Get current percept
+                # ==================================================
+                # GET CURRENT PERCEPT
+                # ==================================================
+
                 percept = self.env.get_percept()
 
+                # ==================================================
                 # IMPORTANT:
-                # SearchAgent uses self.agent.active_algo
-                # Therefore selected algorithm will be used here.
+                # SearchAgent uses the selected algorithm stored in
+                # self.agent.active_algo
+                # ==================================================
+
                 action = self.agent.sense_and_act(percept)
 
-                # Execute selected algorithm's action
+                # Execute action selected by the algorithm
                 self.env.execute_action(action)
 
                 # Redraw grid
                 self.draw_grid()
 
-                # Display selected algorithm during simulation
+                # Show currently selected algorithm
                 self.label.config(
                     text=(
                         f"Algorithm: {self.agent.active_algo} | "
@@ -598,14 +598,14 @@ class GridGameGUI:
 
 
 # ==============================================================
-# Main
+# MAIN
 # ==============================================================
 
 if __name__ == "__main__":
 
     root = tk.Tk()
 
-    # 12x12 grid with 15 food and no opponents
+    # Try a larger grid size like 12x12 with 15 food and 3 opponents!
     app = GridGameGUI(
         root,
         width=12,
